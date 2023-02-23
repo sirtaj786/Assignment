@@ -7,9 +7,9 @@ const fetch = require("node-fetch");
 
 const userRoute = express.Router();
 
-userRoute.get("/get",(req,res)=>{
-  res.send("working")
-})
+// userRoute.get("/get",(req,res)=>{
+//   res.send("working")
+// })
 
 userRoute.post("/fetchdata", async (req, res) => {
     const{ url } = req.body;
@@ -46,10 +46,8 @@ userRoute.post("/fetchdata", async (req, res) => {
   });
   
   
-  
-  
   userRoute.get("/details", async (req, res) => {
-    const { age, gender, limit = 10, page = 1 } = req.query;
+    const { age, gender, limit = 10, page = 1} = req.query;
     console.log(age, gender);
     let filterage = age?.trim().split("-").map(Number) || [];
     console.log(filterage);
@@ -73,7 +71,10 @@ userRoute.post("/fetchdata", async (req, res) => {
           "dob.age": { $gt: filterage[0], $lt: filterage[1] },
         })
         .count();
-    } else if (age) {
+    }
+    
+    
+    else if (age) {
       data = await userModel
         .find({ "dob.age": { $gt: filterage[0], $lt: filterage[1] } })
         .limit(limit)
@@ -92,6 +93,21 @@ userRoute.post("/fetchdata", async (req, res) => {
     console.log(data);
     res.json({ results: data, totalcount: totalcount });
   });
+  
+  userRoute.get("/getage",async(req,res)=>{
+    const { age,limit = 10, page = 1} = req.query;
+    if (age) {
+      data = await userModel
+        .find({ "dob.age": { $gt:50 } })
+        .limit(limit)
+        .skip((page - 1) * limit);
+      totalcount = await userModel
+        .find({ "dob.age": { $gt: 50 } })
+        .count();
+    }
+    res.send({totalcount})
+
+  })
   
 
   module.exports = userRoute;
